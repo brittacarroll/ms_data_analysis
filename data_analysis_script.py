@@ -1,7 +1,6 @@
 
 import pandas as pd
 import sys, getopt
-import pdb
 
 MAX_LESION_SIZE = 6
 MIN_AGE = 22
