@@ -3,6 +3,7 @@ import pandas as pd
 import sys, getopt
 import pdb
 import math
+from more_itertools import flatten
 
 MAX_LESION_SIZE = 6
 MIN_AGE = 22
@@ -43,7 +44,6 @@ def create_subject_list():
         person_data['edu_lev'] = data_file.loc[subject_num, 'Edu_lev']
         person_data['lesion_size'] = lesion_size
 
-        print('appending person data')
         subject_list.append(person_data)
 
 
@@ -64,53 +64,98 @@ def create_ms_and_hc_lists(subject_list):
 
 
 def find_matching_healthy_controls(control, patient):
-    match_age = control.get('age') == patient['age']
-    match_sex = control.get('sex') == patient['sex']
-    match_iq = math.isclose(control.get('iq'), patient['iq'], rel_tol=0.20)
-    match_edu_level = math.isclose(control.get('edu_lev'), patient['edu_lev'], rel_tol=0.20)
+    # match_age = control.get('age') == patient['age']
+    # match_sex = control.get('sex') == patient['sex']
+    match_age = math.isclose(control.get('age'), patient['age'], rel_tol=0.05)
+    match_sex = math.isclose(control.get('sex'), patient['sex'], rel_tol=0.05)
+    match_iq = math.isclose(control.get('iq'), patient['iq'], rel_tol=0.50)
+    match_edu_level = math.isclose(control.get('edu_lev'), patient['edu_lev'], rel_tol=0.60)
 
-    if match_age and match_sex and match_iq and match_edu_level:
-        return True
-    else:
-        return False
+    return match_age and match_sex 
+    # and match_iq and match_edu_level
+
+# def remove_duplicate_patient(duplicate_patient, patient, matching_hc, matching_ms_patients, matching_healthy_controls):
+#     if duplicate_patient[0]['lesion_size'] > patient['lesion_size']:
+#         print(duplicate_patient)
+#         matching_ms_patients.remove(duplicate_patient[0])
+#         print('removing')
+#         matching_ms_patients.remove(duplicate_patient[0])
+#         print(len(matching_ms_patients))
+#         del matching_healthy_controls[duplicate_patient[0]['num']]
+#         print(len(matching_healthy_controls))
+
+    # return matching_ms_patients, matching_healthy_controls
 
 # matches MS patients with healthy controls by age and sex
 def match_ms_and_healthy_controls(ms_patients, healthy_controls):
     matching_ms_patients = []
-    matching_healthy_controls = {}
+    matching_healthy_controls = []
 
     for patient in ms_patients:
-        # find in hc_controls where age and sex match those of MS patient
-        matching_hc = list(filter(lambda control: find_matching_healthy_controls(control, patient), healthy_controls))
 
-        if matching_hc:
-            matching_healthy_controls[patient['num']] = matching_hc
+        matching_hc_numbers = []
+        matching_hc = list(filter(lambda control: find_matching_healthy_controls(control, patient), healthy_controls))
+        if not matching_hc:
+            continue
+
+        for healthy_control in matching_hc:
+            matching_hc_numbers.append(healthy_control['num'])
+        
+        patient['healthy_control_nums'] = matching_hc_numbers
+
+        if patient not in matching_ms_patients:
             matching_ms_patients.append(patient)
 
-    return matching_ms_patients, matching_healthy_controls
+        if matching_hc not in matching_healthy_controls:
+            matching_healthy_controls.append(matching_hc)
+        
+    new_ms_patients_list = []
+    for subject in matching_ms_patients:
+        get_other_patients = list(filter(lambda n: n.get('healthy_control_nums') == subject['healthy_control_nums'], matching_ms_patients))
+        if get_other_patients:
+            seq = [x['lesion_size'] for x in get_other_patients]
+            patient_with_smallest_lesion = list(filter(lambda control: control['lesion_size'] == min(seq), get_other_patients))
+
+            if patient_with_smallest_lesion not in new_ms_patients_list:
+                new_ms_patients_list.append(patient_with_smallest_lesion)
+        
+        else:
+            new_ms_patients_list.append(subject)
+
+    flattened_ms_patients_list = list(flatten(new_ms_patients_list))
+    flattened_healthy_controls = list(flatten(matching_healthy_controls))
+    return flattened_ms_patients_list, flattened_healthy_controls
 
 
 # creates excel file with matching MS and HC data
 def create_excel_file(matching_ms_patients, matching_healthy_controls):
     row_data = []
+    already_added_control_nums = []
     for patient in matching_ms_patients:
 
-        row_values = list(patient.values())
-        patient_hc_matches = matching_healthy_controls.get(patient['num'], None)
+        ignored_keys = ['healthy_control_nums']
+        row_values = [value for key, value in patient.items() if key not in ignored_keys]
 
-        if patient_hc_matches:
-            hc_matches = list(patient_hc_matches[0].values())
-            joined_list = row_values + hc_matches
-            row_data.append(joined_list)
-        else:
-            row_data.append(row_values)
+        control_nums = patient['healthy_control_nums']
+        for num in control_nums:
+            if num in already_added_control_nums:
+                continue
+            else:
+                patient_hc_matches = list(filter(lambda control: control['num'] == num, matching_healthy_controls))
+
+                hc_matches = list(patient_hc_matches[0].values())
+                joined_list = row_values + hc_matches
+                row_data.append(joined_list)
+                already_added_control_nums.append(num)
+                break
+
 
     format_data = pd.DataFrame(row_data,
                    columns=['PATIENT', 'AGE', 'SEX', 'IQ', 'Edu_lev', 'TOTAL LL', 
                    'HC', 'HC-AGE', 'HC-SEX', 'HC-IQ', 'HC-Edu_lev', 'HC-TOTAL LL'])
 
     format_data.index += 1
-    format_data.to_excel("filtered_data_output.xlsx")  
+    format_data.to_excel("please_work.xlsx")  
 
 
 def main():
