@@ -104,10 +104,10 @@ def match_ms_and_healthy_controls(ms_patients, healthy_controls):
     # match to the exact same healthy controls, the code below picks the patient with the smallest lesion size.
     new_ms_patients_list = []
     for subject in matching_ms_patients:
-        get_other_patients = list(filter(lambda n: n.get('healthy_control_nums') == subject['healthy_control_nums'], matching_ms_patients))
+        get_other_patients = list(filter(lambda other_patient: other_patient.get('healthy_control_nums') == subject['healthy_control_nums'], matching_ms_patients))
         if get_other_patients:
-            seq = [x['lesion_size'] for x in get_other_patients]
-            patient_with_smallest_lesion = list(filter(lambda control: control['lesion_size'] == min(seq), get_other_patients))
+            seq = [patient['lesion_size'] for patient in get_other_patients]
+            patient_with_smallest_lesion = list(filter(lambda patient: patient['lesion_size'] == min(seq), get_other_patients))
 
             if patient_with_smallest_lesion not in new_ms_patients_list:
                 new_ms_patients_list.append(patient_with_smallest_lesion)
