@@ -72,6 +72,14 @@ def find_matching_healthy_controls(control, patient):
     return match_age and match_sex and match_iq and match_edu_level
 
 
+def create_list_healthy_control_nums(matching_hc):
+    matching_hc_numbers = []
+    for healthy_control in matching_hc:
+        matching_hc_numbers.append(healthy_control['num'])
+    
+    return matching_hc_numbers
+
+
 # matches MS patients with healthy controls by age and sex
 def match_ms_and_healthy_controls(ms_patients, healthy_controls):
     matching_ms_patients = []
@@ -79,14 +87,11 @@ def match_ms_and_healthy_controls(ms_patients, healthy_controls):
 
     for patient in ms_patients:
 
-        matching_hc_numbers = []
         matching_hc = list(filter(lambda control: find_matching_healthy_controls(control, patient), healthy_controls))
         if not matching_hc:
             continue
 
-        for healthy_control in matching_hc:
-            matching_hc_numbers.append(healthy_control['num'])
-        
+        matching_hc_numbers = create_list_healthy_control_nums(matching_hc)
         patient['healthy_control_nums'] = matching_hc_numbers
 
         if patient not in matching_ms_patients:
