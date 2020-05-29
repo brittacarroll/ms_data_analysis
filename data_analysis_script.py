@@ -64,27 +64,13 @@ def create_ms_and_hc_lists(subject_list):
 
 
 def find_matching_healthy_controls(control, patient):
-    # match_age = control.get('age') == patient['age']
-    # match_sex = control.get('sex') == patient['sex']
-    match_age = math.isclose(control.get('age'), patient['age'], rel_tol=0.05)
-    match_sex = math.isclose(control.get('sex'), patient['sex'], rel_tol=0.05)
-    match_iq = math.isclose(control.get('iq'), patient['iq'], rel_tol=0.50)
-    match_edu_level = math.isclose(control.get('edu_lev'), patient['edu_lev'], rel_tol=0.60)
+    match_age = math.isclose(control.get('age'), patient['age'], rel_tol=0.18)
+    match_sex = math.isclose(control.get('sex'), patient['sex'], rel_tol=0.18)
+    match_iq = math.isclose(control.get('iq'), patient['iq'], rel_tol=0.18)
+    match_edu_level = math.isclose(control.get('edu_lev'), patient['edu_lev'], rel_tol=0.18)
 
-    return match_age and match_sex 
-    # and match_iq and match_edu_level
+    return match_age and match_sex and match_iq and match_edu_level
 
-# def remove_duplicate_patient(duplicate_patient, patient, matching_hc, matching_ms_patients, matching_healthy_controls):
-#     if duplicate_patient[0]['lesion_size'] > patient['lesion_size']:
-#         print(duplicate_patient)
-#         matching_ms_patients.remove(duplicate_patient[0])
-#         print('removing')
-#         matching_ms_patients.remove(duplicate_patient[0])
-#         print(len(matching_ms_patients))
-#         del matching_healthy_controls[duplicate_patient[0]['num']]
-#         print(len(matching_healthy_controls))
-
-    # return matching_ms_patients, matching_healthy_controls
 
 # matches MS patients with healthy controls by age and sex
 def match_ms_and_healthy_controls(ms_patients, healthy_controls):
@@ -108,7 +94,9 @@ def match_ms_and_healthy_controls(ms_patients, healthy_controls):
 
         if matching_hc not in matching_healthy_controls:
             matching_healthy_controls.append(matching_hc)
-        
+    
+    # Some MS patients match to the same healthy controls. If this is the case, and two or more MS patients
+    # match to the exact same healthy controls, the code below picks the patient with the smallest lesion size.
     new_ms_patients_list = []
     for subject in matching_ms_patients:
         get_other_patients = list(filter(lambda n: n.get('healthy_control_nums') == subject['healthy_control_nums'], matching_ms_patients))
@@ -136,6 +124,10 @@ def create_excel_file(matching_ms_patients, matching_healthy_controls):
         ignored_keys = ['healthy_control_nums']
         row_values = [value for key, value in patient.items() if key not in ignored_keys]
 
+        # Sometimes MS patients will have overlapping matching controls. For example, 
+        # 1 MS patient could match with [1002, 1008], whereas another patient could
+        # match with [1002, 1004]. Code below keeps track of HC nums that have been 
+        # included in the Excel sheet. If one is already added, will go on to find other HC.
         control_nums = patient['healthy_control_nums']
         for num in control_nums:
             if num in already_added_control_nums:
@@ -155,7 +147,7 @@ def create_excel_file(matching_ms_patients, matching_healthy_controls):
                    'HC', 'HC-AGE', 'HC-SEX', 'HC-IQ', 'HC-Edu_lev', 'HC-TOTAL LL'])
 
     format_data.index += 1
-    format_data.to_excel("please_work.xlsx")  
+    format_data.to_excel("iq_change.xlsx")  
 
 
 def main():
