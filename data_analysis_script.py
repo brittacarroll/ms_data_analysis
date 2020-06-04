@@ -12,12 +12,6 @@ MAX_AGE = 46
 short_arg_options = "f:"
 long_arg_options = ["file"]
 
-try:
-    arguments, values = getopt.getopt(sys.argv, short_arg_options, long_arg_options)
-except getopt.error as err:
-    print("Please enter valid file name like so: -f {file_name}")
-    sys.exit(2)
-
 data_file = pd.read_excel(f'{sys.argv[-1]}')
 
 # creates list with patients within range of min and max age, <6ml lesion size
@@ -79,6 +73,22 @@ def create_list_healthy_control_nums(matching_hc):
     
     return matching_hc_numbers
 
+def remove_patients_match_with_same_controls(matching_ms_patients):
+    new_ms_patients_list = []
+    for subject in matching_ms_patients:
+        patients_match_with_same_controls = list(filter(lambda other_patient: other_patient.get('healthy_control_nums') == subject['healthy_control_nums'], matching_ms_patients))
+
+        if patients_match_with_same_controls:
+            seq = [patient['lesion_size'] for patient in patients_match_with_same_controls]
+            patient_with_smallest_lesion = list(filter(lambda patient: patient['lesion_size'] == min(seq), patients_match_with_same_controls))
+
+            if patient_with_smallest_lesion not in new_ms_patients_list:
+                new_ms_patients_list.append(patient_with_smallest_lesion)
+    
+        else:
+            new_ms_patients_list.append(subject)
+
+    return new_ms_patients_list
 
 # matches MS patients with healthy controls by age and sex
 def match_ms_and_healthy_controls(ms_patients, healthy_controls):
@@ -102,18 +112,7 @@ def match_ms_and_healthy_controls(ms_patients, healthy_controls):
     
     # Some MS patients match to the same healthy controls. If this is the case, and two or more MS patients
     # match to the exact same healthy controls, the code below picks the patient with the smallest lesion size.
-    new_ms_patients_list = []
-    for subject in matching_ms_patients:
-        get_other_patients = list(filter(lambda other_patient: other_patient.get('healthy_control_nums') == subject['healthy_control_nums'], matching_ms_patients))
-        if get_other_patients:
-            seq = [patient['lesion_size'] for patient in get_other_patients]
-            patient_with_smallest_lesion = list(filter(lambda patient: patient['lesion_size'] == min(seq), get_other_patients))
-
-            if patient_with_smallest_lesion not in new_ms_patients_list:
-                new_ms_patients_list.append(patient_with_smallest_lesion)
-        
-        else:
-            new_ms_patients_list.append(subject)
+    new_ms_patients_list = remove_patients_match_with_same_controls(matching_ms_patients)
 
     flattened_ms_patients_list = list(flatten(new_ms_patients_list))
     flattened_healthy_controls = list(flatten(matching_healthy_controls))
@@ -152,7 +151,7 @@ def create_excel_file(matching_ms_patients, matching_healthy_controls):
                    'HC', 'HC-AGE', 'HC-SEX', 'HC-IQ', 'HC-Edu_lev', 'HC-TOTAL LL'])
 
     format_data.index += 1
-    format_data.to_excel("iq_change.xlsx")  
+    format_data.to_excel("data_analysis_script_results.xlsx")  
 
 
 def main():
