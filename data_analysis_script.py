@@ -58,10 +58,10 @@ def create_patient_and_healthy_control_lists(subject_list):
 
 
 def find_matching_healthy_controls(control, patient):
-    match_age = math.isclose(control.get('age'), patient['age'], rel_tol=0.18)
-    match_sex = math.isclose(control.get('sex'), patient['sex'], rel_tol=0.18)
-    match_iq = math.isclose(control.get('iq'), patient['iq'], rel_tol=0.18)
-    match_edu_level = math.isclose(control.get('edu_lev'), patient['edu_lev'], rel_tol=0.18)
+    match_age = math.isclose(control.get('age'), patient['age'], rel_tol=0.15)
+    match_sex = math.isclose(control.get('sex'), patient['sex'], rel_tol=0.15)
+    match_iq = math.isclose(control.get('iq'), patient['iq'], rel_tol=0.20)
+    match_edu_level = math.isclose(control.get('edu_lev'), patient['edu_lev'], rel_tol=0.20)
 
     return match_age and match_sex and match_iq and match_edu_level
 
