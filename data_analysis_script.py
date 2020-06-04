@@ -44,7 +44,7 @@ def create_subject_list():
     return subject_list
 
 # divides subjects into MS patients and healthy controls
-def create_ms_and_hc_lists(subject_list):
+def create_patient_and_healthy_control_lists(subject_list):
     ms_patients = []
     healthy_controls = []
 
@@ -67,11 +67,11 @@ def find_matching_healthy_controls(control, patient):
 
 
 def create_list_healthy_control_nums(matching_hc):
-    matching_hc_numbers = []
+    matching_hc_nums = []
     for healthy_control in matching_hc:
-        matching_hc_numbers.append(healthy_control['num'])
+        matching_hc_nums.append(healthy_control['num'])
     
-    return matching_hc_numbers
+    return matching_hc_nums
 
 def remove_patients_match_with_same_controls(matching_ms_patients):
     new_ms_patients_list = []
@@ -79,8 +79,8 @@ def remove_patients_match_with_same_controls(matching_ms_patients):
         patients_match_with_same_controls = list(filter(lambda other_patient: other_patient.get('healthy_control_nums') == subject['healthy_control_nums'], matching_ms_patients))
 
         if patients_match_with_same_controls:
-            seq = [patient['lesion_size'] for patient in patients_match_with_same_controls]
-            patient_with_smallest_lesion = list(filter(lambda patient: patient['lesion_size'] == min(seq), patients_match_with_same_controls))
+            patients_lesion_size = [patient['lesion_size'] for patient in patients_match_with_same_controls]
+            patient_with_smallest_lesion = list(filter(lambda patient: patient['lesion_size'] == min(patients_lesion_size), patients_match_with_same_controls))
 
             if patient_with_smallest_lesion not in new_ms_patients_list:
                 new_ms_patients_list.append(patient_with_smallest_lesion)
@@ -156,7 +156,7 @@ def create_excel_file(matching_ms_patients, matching_healthy_controls):
 
 def main():
     subject_list = create_subject_list()
-    ms_patients, healthy_controls = create_ms_and_hc_lists(subject_list)
+    ms_patients, healthy_controls = create_patient_and_healthy_control_lists(subject_list)
     matching_ms_patients, matching_healthy_controls = match_ms_and_healthy_controls(ms_patients, healthy_controls)
     create_excel_file(matching_ms_patients, matching_healthy_controls)
 
