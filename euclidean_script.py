@@ -32,29 +32,16 @@ def create_subject_list():
             continue
 
         num = data_file.loc[subject_num, 'Patient'] 
-        # pdb.set_trace()
         sex = data_file.loc[subject_num, 'SEX']
         iq = data_file.loc[subject_num, 'IQ']
         edu_level = data_file.loc[subject_num, 'Edu_lev']
 
         subject_data = [num, age, sex, iq, edu_level, lesion_size]
 
-        # should probably be an array of arrays
-        # cross-product of two (patient and hc?)
-        # sort by distance (shortest)
-        # control 32? someone already paired with them
-
-
         subject_list.append(subject_data)
 
-    # pdb.set_trace()
     return subject_list
 
-    #distance.cdist(np.atleast_2d(single_point), np.atleast_2d(points), 'euclidean')
-
-
-# np.linalg.norm(x - y)
-# 5D
 
 # divides subjects into MS patients and healthy controls
 def create_patient_and_healthy_control_lists(subject_list):
@@ -77,14 +64,11 @@ def create_patient_and_healthy_control_lists(subject_list):
 def match_controls_with_patients(patient_list, control_list):
     print('in match_controls')
     patient_healthy_control_data = []
-    # patient_list_with_vars_that_matter = np.delete(patient_list, [0,5], axis=1)
-    # control_list_with_vars_that_matter = np.delete(control_list, [0,5], axis=1)
+
     for control in control_list:
-        # grab patient vector that most closely resembles control
 
         patient_closest_matches = patient_list[np.argsort(distance.cdist(np.atleast_2d(control), np.atleast_2d(patient_list), 'wminkowski', w=[0,5,1,5,1,0]))][0]
-        # new_patient_list = np.delete(patient_closest_match, patient_list, axis=0)
-        # pdb.set_trace()
+
         matches = patient_closest_matches.tolist()
         for patient in matches:
             if patient in patient_healthy_control_data:
@@ -92,11 +76,9 @@ def match_controls_with_patients(patient_list, control_list):
             else:
                 control_array = control.tolist()
                 patient_control_row = patient + control_array
-                # patient_control_row = np.concatenate((patient, control))
                 patient_healthy_control_data.append(patient_control_row)
                 break
 
-        # if more than 1, get patient with smallest lesion_size
 
     return patient_healthy_control_data
 
