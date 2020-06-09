@@ -1,8 +1,6 @@
 import pandas as pd
 import sys, getopt
 import pdb
-import math
-from more_itertools import flatten
 import numpy as np
 from scipy.spatial import distance
 
@@ -58,7 +56,6 @@ def create_patient_and_healthy_control_lists(subject_list):
     numpy_ms_patients = np.array(ms_patients)
     numpy_healthy_controls = np.array(healthy_controls)
 
-    # pdb.set_trace()
     return numpy_ms_patients, numpy_healthy_controls
 
 def match_controls_with_patients(patient_list, control_list):
