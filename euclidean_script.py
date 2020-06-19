@@ -5,8 +5,8 @@ import numpy as np
 from scipy.spatial import distance
 
 MAX_LESION_SIZE = 6
-MIN_AGE = 22
-MAX_AGE = 46
+MIN_AGE = 20
+MAX_AGE = 50
 
 short_arg_options = "f:"
 long_arg_options = ["file"]
@@ -18,7 +18,7 @@ def create_subject_list():
     subject_list = []
     for subject_num in (range(0, data_file.index[-1] + 1)):
 
-        if not isinstance(data_file.loc[subject_num, 'Patient'].item(), int):
+        if not isinstance(data_file.loc[subject_num, 'PATIENT'].item(), int):
             continue
 
         age = data_file.loc[subject_num, 'AGE']
@@ -29,7 +29,7 @@ def create_subject_list():
         if not lesion_size < MAX_LESION_SIZE:
             continue
 
-        num = data_file.loc[subject_num, 'Patient'] 
+        num = data_file.loc[subject_num, 'PATIENT'] 
         sex = data_file.loc[subject_num, 'SEX']
         iq = data_file.loc[subject_num, 'IQ']
         edu_level = data_file.loc[subject_num, 'Edu_lev']
@@ -59,12 +59,10 @@ def create_patient_and_healthy_control_lists(subject_list):
     return numpy_ms_patients, numpy_healthy_controls
 
 def match_controls_with_patients(patient_list, control_list):
-    print('in match_controls')
     patient_healthy_control_data = []
 
     for control in control_list:
-
-        patient_closest_matches = patient_list[np.argsort(distance.cdist(np.atleast_2d(control), np.atleast_2d(patient_list), 'wminkowski', w=[0,5,1,5,1,0]))][0]
+        patient_closest_matches = patient_list[np.argsort(distance.cdist(np.atleast_2d(control), np.atleast_2d(patient_list), 'wminkowski', w=[0,5,5,5,2,0]))][0]
 
         matches = patient_closest_matches.tolist()
         for patient in matches:
@@ -76,7 +74,6 @@ def match_controls_with_patients(patient_list, control_list):
                 patient_healthy_control_data.append(patient_control_row)
                 break
 
-
     return patient_healthy_control_data
 
 def create_excel_file(patient_healthy_control_data):
@@ -87,7 +84,7 @@ def create_excel_file(patient_healthy_control_data):
                    'HC', 'HC-AGE', 'HC-SEX', 'HC-IQ', 'HC-Edu_lev', 'HC-TOTAL LL'])
 
     format_data.index += 1
-    format_data.to_excel("data_analysis_script_results.xlsx")  
+    format_data.to_excel("new_results_diff_weights.xlsx")  
 
 def main():
     subject_list = create_subject_list()
