@@ -59,12 +59,18 @@ def create_patient_and_healthy_control_lists(subject_list):
     return numpy_ms_patients, numpy_healthy_controls
 
 def match_controls_with_patients(patient_list, control_list):
+    # patient_healthy_control_data = np.empty((0,6))
     patient_healthy_control_data = []
 
     for control in control_list:
         patient_closest_matches = patient_list[np.argsort(distance.cdist(np.atleast_2d(control), np.atleast_2d(patient_list), 'wminkowski', w=[0,5,5,5,2,0]))][0]
 
         matches = patient_closest_matches.tolist()
+        # match_not_already_in_patient_hc_data = (patient_closest_matches - patient_healthy_control_data)[0]
+        # concatenated_array = np.concatenate((match_not_already_in_patient_hc_data,control),axis=0)
+        # np.append(patient_healthy_control_data, concatenated_array, axis=0)
+
+        # matches[0].append(patient_healthy_control_data)
         for patient in matches:
             if patient in patient_healthy_control_data:
                 continue
