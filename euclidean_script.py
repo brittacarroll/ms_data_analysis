@@ -12,6 +12,8 @@ short_arg_options = "f:"
 long_arg_options = ["file"]
 
 data_file = pd.read_excel(f'{sys.argv[-1]}')
+# TODO: read two excel files, and concatenate data
+# data_file_2 = pd.read_excel
 
 #creates list with patients within range of min and max age, <6ml lesion size
 def create_subject_list():
@@ -71,6 +73,7 @@ def match_controls_with_patients(patient_list, control_list):
         # np.append(patient_healthy_control_data, concatenated_array, axis=0)
 
         # matches[0].append(patient_healthy_control_data)
+        # TODO: get rid of second for loop, with commented-out code above
         for patient in matches:
             if patient in patient_healthy_control_data:
                 continue
