@@ -13,8 +13,3 @@ pip freeze > requirements.txt
 # Run code
 python3 data_analysis_script.py -f {file_name}
 
-
-
-
-
-# python_data_analysis_script
