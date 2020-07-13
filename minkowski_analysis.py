@@ -70,7 +70,7 @@ def match_controls_with_patients(patient_list, control_list):
 
     for control in control_list:
         patient_closest_matches = patient_list[np.argsort(distance.cdist(np.atleast_2d(
-            control), np.atleast_2d(patient_list), 'wminkowski', w=[0, 5, 5, 5, 2, 0]))][0]
+            control), np.atleast_2d(patient_list), 'wminkowski', w=[0, 5, 3, 5, 2, 0]))][0]
 
         matches = patient_closest_matches.tolist()
         # match_not_already_in_patient_hc_data = (patient_closest_matches - patient_healthy_control_data)[0]
@@ -110,7 +110,7 @@ def create_excel_file(patient_healthy_control_data):
             'HC-TOTAL LL'])
 
     format_data.index += 1
-    format_data.to_excel("new_results_diff_weights.xlsx")
+    format_data.to_excel("minkowski_analysis_results.xlsx")
 
 
 def main():
