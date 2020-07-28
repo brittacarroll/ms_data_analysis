@@ -3,6 +3,7 @@ import sys
 import getopt
 import pdb
 import numpy as np
+import argparse
 from scipy.spatial import distance
 
 MAX_LESION_SIZE = 6
@@ -12,7 +13,52 @@ MAX_AGE = 50
 short_arg_options = "f:"
 long_arg_options = ["file"]
 
-data_file = pd.read_excel(f'{sys.argv[-1]}')
+DEFAULT_WEIGHTS = [0, 5, 5, 3, 3, 0]
+
+# --help not working-fix
+parser = argparse.ArgumentParser(
+    description='Runs Excel data and returns new Excel file with patient control matches.')
+
+parser.add_argument('--age', '-a', type=int, default=0,
+                    help='age weight')
+parser.add_argument('--sex', '-s', type=int, default=0,
+                    help='sex weight')
+parser.add_argument('--IQ', '-IQ', type=int, default=0,
+                    help='IQ weight')
+parser.add_argument('--edu_level', '-el', type=int, default=0,
+                    help='Education level weight')
+parser.add_argument('-file', '-f', type=str,
+                    help='Excel file to be analyzed')
+
+command_line_args = vars(parser.parse_args())
+
+
+# even though can pass in as '-f', argparse takes first argument name in
+# add_argument as name of arg
+excel_file = command_line_args['file']
+data_file = pd.read_excel(excel_file)
+
+WEIGHTS = [
+    0,
+    command_line_args['age'],
+    command_line_args['sex'],
+    command_line_args['IQ'],
+    command_line_args['edu_level'],
+    0
+]
+
+
+data_file = pd.read_excel(excel_file)
+
+
+def create_minkowski_weights():
+    if all(value == 0 for value in WEIGHTS):
+        weights = DEFAULT_WEIGHTS
+    else:
+        weights = WEIGHTS
+
+    return weights
+
 # TODO: read two excel files, and concatenate data
 # data_file_2 = pd.read_excel
 
@@ -69,8 +115,13 @@ def match_controls_with_patients(patient_list, control_list):
     patient_healthy_control_data = []
 
     for control in control_list:
+        weights = create_minkowski_weights()
+
+        # NOTE: have to use cdist scipy function here to pass in collections of arrays.
+        # Looked into using distance.minkowski func but can only pass in 1-D
+        # arrays. Could maybe refactor in future.
         patient_closest_matches = patient_list[np.argsort(distance.cdist(np.atleast_2d(
-            control), np.atleast_2d(patient_list), 'wminkowski', w=[0, 5, 3, 5, 2, 0]))][0]
+            control), np.atleast_2d(patient_list), 'wminkowski', w=weights))][0]
 
         matches = patient_closest_matches.tolist()
         # match_not_already_in_patient_hc_data = (patient_closest_matches - patient_healthy_control_data)[0]
