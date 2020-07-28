@@ -7,8 +7,6 @@ import argparse
 from scipy.spatial import distance
 
 MAX_LESION_SIZE = 6
-MIN_AGE = 20
-MAX_AGE = 50
 
 short_arg_options = "f:"
 long_arg_options = ["file"]
@@ -47,9 +45,7 @@ WEIGHTS = [
     0
 ]
 
-
 data_file = pd.read_excel(excel_file)
-
 
 def create_minkowski_weights():
     if all(value == 0 for value in WEIGHTS):
@@ -63,27 +59,28 @@ def create_minkowski_weights():
 # data_file_2 = pd.read_excel
 
 # creates list with patients within range of min and max age, <6ml lesion size
-
-
 def create_subject_list():
     subject_list = []
+    max_age = data_file['AGE'].max()
+    min_age = data_file['AGE'].min()
+
     for subject_num in (range(0, data_file.index[-1] + 1)):
-
-        if not isinstance(data_file.loc[subject_num, 'PATIENT'].item(), int):
+        data_row = data_file.loc
+        if not isinstance(data_row[subject_num, 'PATIENT'].item(), int):
             continue
 
-        age = data_file.loc[subject_num, 'AGE']
-        if not age or age <= MIN_AGE or age >= MAX_AGE:
+        age = data_row[subject_num, 'AGE']
+        if not age or age <= min_age or age >= max_age:
             continue
 
-        lesion_size = data_file.loc[subject_num, 'Total_LL']
+        lesion_size = data_row[subject_num, 'Total_LL']
         if not lesion_size < MAX_LESION_SIZE:
             continue
 
-        num = data_file.loc[subject_num, 'PATIENT']
-        sex = data_file.loc[subject_num, 'SEX']
-        iq = data_file.loc[subject_num, 'IQ']
-        edu_level = data_file.loc[subject_num, 'Edu_lev']
+        num = data_row[subject_num, 'PATIENT']
+        sex = data_row[subject_num, 'SEX']
+        iq = data_row[subject_num, 'IQ']
+        edu_level = data_row[subject_num, 'Edu_lev']
 
         subject_data = [num, age, sex, iq, edu_level, lesion_size]
 
