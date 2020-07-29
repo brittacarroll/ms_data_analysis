@@ -8,10 +8,12 @@ from scipy.spatial import distance
 
 MAX_LESION_SIZE = 6
 
-short_arg_options = "f:"
-long_arg_options = ["file"]
-
 DEFAULT_WEIGHTS = [0, 5, 5, 3, 3, 0]
+
+
+#TODO: 
+# allow for two excel files to be accepted into script
+# fix double for loop below
 
 # --help not working-fix
 parser = argparse.ArgumentParser(
@@ -55,8 +57,31 @@ def create_minkowski_weights():
 
     return weights
 
-# TODO: read two excel files, and concatenate data
-# data_file_2 = pd.read_excel
+
+def validate_excel_column_names(data_file):
+    column_names = data_file.columns
+    possible_patient_column_names = ['PATIENT', 'patient', 'Patient', 'Num', 'Patient Num', 'patient num', 'Patient num']
+    possible_age_column_names = ['AGE', 'age', 'Age']
+    possible_sex_column_names = ['SEX', 'sex', 'Sex']
+    possible_iq_column_names = ['IQ', 'iq']
+    possible_edu_level_column_names = ['Edu level', 'EDU_LEVEL', 'Education Level', 'Education', 'EDUCATION', 'Edu lev', 'Edu_lev']
+
+    list_column_names = data_file.columns.tolist()
+    if not set(possible_patient_column_names).intersection(list_column_names):
+        raise Exception(f"Patient column name must be spelled {possible_patient_column_names}.")
+
+    if not set(possible_age_column_names).intersection(list_column_names):
+        raise Exception(f"Age column name must be spelled: {possible_age_column_names}.")
+
+    if not set(possible_sex_column_names).intersection(list_column_names):
+        raise Exception(f"Sex column name must be spelled: {possible_sex_column_names}.")
+
+    if not set(possible_iq_column_names).intersection(list_column_names):
+        raise Exception(f"IQ column name must be spelled: {possible_iq_column_names}.")
+
+    if not set(possible_edu_level_column_names).intersection(list_column_names):
+        raise Exception(f"Edu level column name must be spelled: {possible_edu_level_column_names}.")
+
 
 # creates list with patients within range of min and max age, <6ml lesion size
 def create_subject_list():
@@ -64,8 +89,9 @@ def create_subject_list():
     max_age = data_file['AGE'].max()
     min_age = data_file['AGE'].min()
 
+    data_row = data_file.loc
+    validate_excel_column_names(data_file)
     for subject_num in (range(0, data_file.index[-1] + 1)):
-        data_row = data_file.loc
         if not isinstance(data_row[subject_num, 'PATIENT'].item(), int):
             continue
 
