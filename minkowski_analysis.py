@@ -92,6 +92,7 @@ def create_subject_list():
     data_row = data_file.loc
     validate_excel_column_names(data_file)
     for subject_num in (range(0, data_file.index[-1] + 1)):
+        #TODO: change PATIENT here to factor in possible patient column names
         if not isinstance(data_row[subject_num, 'PATIENT'].item(), int):
             continue
 

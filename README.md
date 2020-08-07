@@ -9,7 +9,7 @@ Run on command line, inside of project folder:
 1. python3 -m venv NAME_OF_VENV
 2. source venv/bin/activate
 
-More on virtual envs: https://towardsdatascience.com/virtual-environments-104c62d48c54
+More on virtual envs: [here](https://towardsdatascience.com/virtual-environments-104c62d48c54)
 
 # Create requirements.txt
 pip freeze > requirements.txt
