@@ -15,7 +15,6 @@ DEFAULT_WEIGHTS = [0, 5, 5, 3, 3, 0]
 # allow for two excel files to be accepted into script
 # fix double for loop below
 
-# --help not working-fix
 parser = argparse.ArgumentParser(
     description='Runs Excel data and returns new Excel file with patient control matches.')
 
@@ -27,7 +26,7 @@ parser.add_argument('--IQ', '-IQ', type=int, default=0,
                     help='IQ weight')
 parser.add_argument('--edu_level', '-el', type=int, default=0,
                     help='Education level weight')
-parser.add_argument('-file', '-f', type=str,
+parser.add_argument('-file', '-f', type=str, required=True,
                     help='Excel file to be analyzed')
 
 command_line_args = vars(parser.parse_args())
@@ -57,57 +56,88 @@ def create_minkowski_weights():
 
     return weights
 
-
-def validate_excel_column_names(data_file):
+def validate_excel_column_names():
     column_names = data_file.columns
     possible_patient_column_names = ['PATIENT', 'patient', 'Patient', 'Num', 'Patient Num', 'patient num', 'Patient num']
     possible_age_column_names = ['AGE', 'age', 'Age']
     possible_sex_column_names = ['SEX', 'sex', 'Sex']
     possible_iq_column_names = ['IQ', 'iq']
     possible_edu_level_column_names = ['Edu level', 'EDU_LEVEL', 'Education Level', 'Education', 'EDUCATION', 'Edu lev', 'Edu_lev']
+    possible_lesion_load_column_names = ['Total_LL', 'lesion load', 'Lesion Load', 'Total LL']
 
     list_column_names = data_file.columns.tolist()
     if not set(possible_patient_column_names).intersection(list_column_names):
         raise Exception(f"Patient column name must be spelled {possible_patient_column_names}.")
 
+    
+    patient_col_name = set(possible_patient_column_names).intersection(list_column_names)
+    global patient_glob
+    for item in patient_col_name:
+        patient_glob = item
+
     if not set(possible_age_column_names).intersection(list_column_names):
         raise Exception(f"Age column name must be spelled: {possible_age_column_names}.")
+    
+    age_col_name = set(possible_age_column_names).intersection(list_column_names)
+    global age_glob
+    for item in age_col_name:
+        age_glob = item
 
     if not set(possible_sex_column_names).intersection(list_column_names):
         raise Exception(f"Sex column name must be spelled: {possible_sex_column_names}.")
+    
+    sex_col_name = set(possible_sex_column_names).intersection(list_column_names)
+    global sex_glob
+    for item in sex_col_name:
+        sex_glob = item
 
     if not set(possible_iq_column_names).intersection(list_column_names):
         raise Exception(f"IQ column name must be spelled: {possible_iq_column_names}.")
+    
+    iq_col_name = set(possible_iq_column_names).intersection(list_column_names)
+    global iq_glob
+    for item in iq_col_name:
+        iq_glob = item
 
     if not set(possible_edu_level_column_names).intersection(list_column_names):
         raise Exception(f"Edu level column name must be spelled: {possible_edu_level_column_names}.")
+    
+    edu_level_col_name = set(possible_edu_level_column_names).intersection(list_column_names)
+    global edu_level_glob
+    for item in edu_level_col_name:
+        edu_level_glob = item
 
+    if not set(possible_lesion_load_column_names).intersection(list_column_names):
+        raise Exception(f"Lesion load column name must be spelled: {possible_lesion_load_column_names}.")
+
+    lesion_load_col_name = set(possible_lesion_load_column_names).intersection(list_column_names)
+    global lesion_load_glob
+    for item in lesion_load_col_name:
+        lesion_load_glob = item
 
 # creates list with patients within range of min and max age, <6ml lesion size
 def create_subject_list():
     subject_list = []
-    max_age = data_file['AGE'].max()
-    min_age = data_file['AGE'].min()
+    max_age = data_file[age_glob].max()
+    min_age = data_file[age_glob].min()
 
     data_row = data_file.loc
-    validate_excel_column_names(data_file)
     for subject_num in (range(0, data_file.index[-1] + 1)):
-        #TODO: change PATIENT here to factor in possible patient column names
-        if not isinstance(data_row[subject_num, 'PATIENT'].item(), int):
+        if not isinstance(data_row[subject_num, patient_glob].item(), int):
             continue
 
-        age = data_row[subject_num, 'AGE']
+        age = data_row[subject_num, age_glob]
         if not age or age <= min_age or age >= max_age:
             continue
 
-        lesion_size = data_row[subject_num, 'Total_LL']
+        lesion_size = data_row[subject_num, lesion_load_glob]
         if not lesion_size < MAX_LESION_SIZE:
             continue
 
-        num = data_row[subject_num, 'PATIENT']
-        sex = data_row[subject_num, 'SEX']
-        iq = data_row[subject_num, 'IQ']
-        edu_level = data_row[subject_num, 'Edu_lev']
+        num = data_row[subject_num, patient_glob]
+        sex = data_row[subject_num, sex_glob]
+        iq = data_row[subject_num, iq_glob]
+        edu_level = data_row[subject_num, edu_level_glob]
 
         subject_data = [num, age, sex, iq, edu_level, lesion_size]
 
@@ -141,19 +171,25 @@ def match_controls_with_patients(patient_list, control_list):
     for control in control_list:
         weights = create_minkowski_weights()
 
-        # NOTE: have to use cdist scipy function here to pass in collections of arrays.
-        # Looked into using distance.minkowski func but can only pass in 1-D
-        # arrays. Could maybe refactor in future.
+        #controls and patients:
+        #minkowski distance so get cross product of all of them
+        #sort by total distance
+        #control index, patient index, 
+        #sort by distance--smallest distance between patient and control
+        #for each control, compare to each of patients
+        #end up with list of 2500--every single pair combo and distance
+        #sort by distance--these are all pairs with smallest distance
+        #for each control, find where they are in sorted list
+
+        # one list all distances sorted
+        # then find patient per control
+
+        # break this up into variables
         patient_closest_matches = patient_list[np.argsort(distance.cdist(np.atleast_2d(
             control), np.atleast_2d(patient_list), 'wminkowski', w=weights))][0]
 
         matches = patient_closest_matches.tolist()
-        # match_not_already_in_patient_hc_data = (patient_closest_matches - patient_healthy_control_data)[0]
-        # concatenated_array = np.concatenate((match_not_already_in_patient_hc_data,control),axis=0)
-        # np.append(patient_healthy_control_data, concatenated_array, axis=0)
-
-        # matches[0].append(patient_healthy_control_data)
-        # TODO: get rid of second for loop, with commented-out code above
+ 
         for patient in matches:
             if patient in patient_healthy_control_data:
                 continue
@@ -189,6 +225,7 @@ def create_excel_file(patient_healthy_control_data):
 
 
 def main():
+    validate_excel_column_names()
     subject_list = create_subject_list()
     ms_patients, healthy_controls = create_patient_and_healthy_control_lists(
         subject_list)
