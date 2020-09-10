@@ -35,8 +35,8 @@ possible_set_number_names = ['Set', 'set', 'Data set num', 'Data Set', 'Data set
 *Command line arguments*:
 
 --file or -f:
-Type: Required
-Usage: Input Excel file that contains all of data to be analyzed.
+1. Type: Required
+2. Usage: Input Excel file that contains all of data to be analyzed.
 Example: python3 minkowski_analysis.py --file 'Excel_file.xlsx'
 
 NOTE: use the arguments below if you would like to input your own weights per each variable.
@@ -47,22 +47,22 @@ If no optional arguments are inputed, the default weights are 5,5,3,3 for age, s
 *Optional command line arguments*:
 
 --age or -a:
-Usage: Use this argument if you would like to use the age variable to compare patients and controls. This will set an 'age weight'. Higher number = heavier weight in Minkowski analysis.
+1. Usage: Use this argument if you would like to use the age variable to compare patients and controls. This will set an 'age weight'. Higher number = heavier weight in Minkowski analysis.
 
-Example: --age 4
+Example: --age 4:
 (4 if the weight in this case)
 
---sex or -s
-Usage: Use this is want to use sex variable to compare patients and controls. Same as --age argument above, the number following this variable will be the weight attached to it during analysis.
+--sex or -s:
+1. Usage: Use this is want to use sex variable to compare patients and controls. Same as --age argument above, the number following this variable will be the weight attached to it during analysis.
 
 Example: --sex 3
 
---IQ or -IQ
-Usage: IQ weight (same as age and sex above).
+--IQ or -IQ:
+1. Usage: IQ weight (same as age and sex above).
 Example: --IQ 3
 
---edu_level or -el
-Usage: Education level weight (same as other args above).
+--edu_level or -el:
+1. Usage: Education level weight (same as other args above).
 Example: --edu_level 2
 
 
