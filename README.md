@@ -14,6 +14,22 @@ More on virtual envs: [here](https://towardsdatascience.com/virtual-environments
 # Create requirements.txt
 pip freeze > requirements.txt
 
+# The Excel file that is passed into this script must contain the following column names:
+
+possible_patient_column_names = ['PATIENT', 'patient', 'Patient', 'Num', 'Patient Num', 'patient num', 'Patient num']
+
+possible_age_column_names = ['AGE', 'age', 'Age']
+
+possible_sex_column_names = ['SEX', 'sex', 'Sex']
+
+possible_iq_column_names = ['IQ', 'iq']
+
+possible_edu_level_column_names = ['Edu level', 'EDU_LEVEL', 'Education Level', 'Education', 'EDUCATION', 'Edu lev', 'Edu_lev']
+
+possible_lesion_load_column_names = ['Total_LL', 'lesion load', 'Lesion Load', 'Total LL']
+
+possible_set_number_names = ['Set', 'set', 'Data set num', 'Data Set', 'Data set', 'data set', 'data set num']
+
 # Run code
 
 *Command line arguments*:

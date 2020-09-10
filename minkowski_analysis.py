@@ -8,12 +8,8 @@ from scipy.spatial import distance
 
 MAX_LESION_SIZE = 6
 
-DEFAULT_WEIGHTS = [0, 5, 5, 3, 3, 0]
+DEFAULT_WEIGHTS = [0, 0, 5, 5, 3, 3, 0]
 
-
-#TODO: 
-# allow for two excel files to be accepted into script
-# fix double for loop below
 
 parser = argparse.ArgumentParser(
     description='Runs Excel data and returns new Excel file with patient control matches.')
@@ -37,7 +33,9 @@ command_line_args = vars(parser.parse_args())
 excel_file = command_line_args['file']
 data_file = pd.read_excel(excel_file)
 
+# 1: data_set_num, 2: patient num, 3: age, 4: sex, 5: iq, 6: edu_level, 7: lesion_load
 WEIGHTS = [
+    0,
     0,
     command_line_args['age'],
     command_line_args['sex'],
@@ -64,6 +62,7 @@ def validate_excel_column_names():
     possible_iq_column_names = ['IQ', 'iq']
     possible_edu_level_column_names = ['Edu level', 'EDU_LEVEL', 'Education Level', 'Education', 'EDUCATION', 'Edu lev', 'Edu_lev']
     possible_lesion_load_column_names = ['Total_LL', 'lesion load', 'Lesion Load', 'Total LL']
+    possible_set_number_names = ['Set', 'set', 'Data set num', 'Data Set', 'Data set', 'data set', 'data set num']
 
     list_column_names = data_file.columns.tolist()
     if not set(possible_patient_column_names).intersection(list_column_names):
@@ -115,6 +114,13 @@ def validate_excel_column_names():
     for item in lesion_load_col_name:
         lesion_load_glob = item
 
+    if not set(possible_set_number_names).intersection(list_column_names):
+        raise Exception(f"Data set nunber (1 or 2) not indicated.")
+    data_set_col_name = set(possible_set_number_names).intersection(list_column_names)
+    global data_set_num_glob
+    for item in data_set_col_name:
+        data_set_num_glob = item
+
 # creates list with patients within range of min and max age, <6ml lesion size
 def create_subject_list():
     subject_list = []
@@ -138,8 +144,9 @@ def create_subject_list():
         sex = data_row[subject_num, sex_glob]
         iq = data_row[subject_num, iq_glob]
         edu_level = data_row[subject_num, edu_level_glob]
+        data_set_number = data_row[subject_num, data_set_num_glob]
 
-        subject_data = [num, age, sex, iq, edu_level, lesion_size]
+        subject_data = [data_set_number, num, age, sex, iq, edu_level, lesion_size]
 
         subject_list.append(subject_data)
 
@@ -151,9 +158,9 @@ def create_patient_and_healthy_control_lists(subject_list):
     ms_patients = []
     healthy_controls = []
 
-    # subject is an array with zeroth index being subject_num.
+    # subject is an array with zeroth index being data set num.
     for subject in subject_list:
-        if subject[0] >= 1000:
+        if subject[0] == 2:
             healthy_controls.append(subject)
         else:
             ms_patients.append(subject)
@@ -203,16 +210,17 @@ def match_controls_with_patients(patient_list, control_list):
 
 
 def create_excel_file(patient_healthy_control_data):
-
     format_data = pd.DataFrame(
         patient_healthy_control_data,
         columns=[
+            'DATA SET NUM',
             'PATIENT',
             'AGE',
             'SEX',
             'IQ',
             'Edu_lev',
             'TOTAL LL',
+            'DATA SET NUM',
             'HC',
             'HC-AGE',
             'HC-SEX',
