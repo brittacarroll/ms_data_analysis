@@ -175,7 +175,7 @@ def match_controls_with_patients(patient_list, control_list):
     # patient_healthy_control_data = np.empty((0,6))
     patient_healthy_control_data = []
 
-    for control in control_list:
+    for patient in patient_list:
         weights = create_minkowski_weights()
 
         #controls and patients:
@@ -192,17 +192,17 @@ def match_controls_with_patients(patient_list, control_list):
         # then find patient per control
 
         # break this up into variables
-        patient_closest_matches = patient_list[np.argsort(distance.cdist(np.atleast_2d(
+        control_closest_matches = control_list[np.argsort(distance.cdist(np.atleast_2d(
             control), np.atleast_2d(patient_list), 'wminkowski', w=weights))][0]
 
-        matches = patient_closest_matches.tolist()
+        matches = control_closest_matches.tolist()
  
-        for patient in matches:
-            if patient in patient_healthy_control_data:
+        for control in matches:
+            if control in patient_healthy_control_data:
                 continue
             else:
-                control_array = control.tolist()
-                patient_control_row = patient + control_array
+                patient_array = patient.tolist()
+                patient_control_row = patient_array + control
                 patient_healthy_control_data.append(patient_control_row)
                 break
 
