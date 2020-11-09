@@ -193,7 +193,7 @@ def match_controls_with_patients(patient_list, control_list):
 
         # break this up into variables
         control_closest_matches = control_list[np.argsort(distance.cdist(np.atleast_2d(
-            control), np.atleast_2d(patient_list), 'wminkowski', w=weights))][0]
+            patient), np.atleast_2d(control_list), 'wminkowski', w=weights))][0]
 
         matches = control_closest_matches.tolist()
  
