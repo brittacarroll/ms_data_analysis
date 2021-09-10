@@ -33,7 +33,8 @@ command_line_args = vars(parser.parse_args())
 excel_file = command_line_args['file']
 data_file = pd.read_excel(excel_file)
 
-# 1: data_set_num, 2: patient num, 3: age, 4: sex, 5: iq, 6: edu_level, 7: lesion_load
+# 1: data_set_num, 2: patient num, 3: age, 4: sex, 5: iq, 6: edu_level, 7:
+# lesion_load
 WEIGHTS = [
     0,
     0,
@@ -46,6 +47,7 @@ WEIGHTS = [
 
 data_file = pd.read_excel(excel_file)
 
+
 def create_minkowski_weights():
     if all(value == 0 for value in WEIGHTS):
         weights = DEFAULT_WEIGHTS
@@ -54,74 +56,115 @@ def create_minkowski_weights():
 
     return weights
 
+
 def validate_excel_column_names():
     column_names = data_file.columns
-    possible_patient_column_names = ['PATIENT', 'patient', 'Patient', 'Num', 'Patient Num', 'patient num', 'Patient num']
+    possible_patient_column_names = [
+        'SUBJECT',
+        'Subject',
+        'subject',
+        'PATIENT',
+        'patient',
+        'Patient',
+        'Num',
+        'Patient Num',
+        'patient num',
+        'Patient num']
     possible_age_column_names = ['AGE', 'age', 'Age']
     possible_sex_column_names = ['SEX', 'sex', 'Sex']
     possible_iq_column_names = ['IQ', 'iq']
-    possible_edu_level_column_names = ['Edu level', 'EDU_LEVEL', 'Education Level', 'Education', 'EDUCATION', 'Edu lev', 'Edu_lev']
-    possible_lesion_load_column_names = ['Total_LL', 'lesion load', 'Lesion Load', 'Total LL']
-    possible_set_number_names = ['Set', 'set', 'Data set num', 'Data Set', 'Data set', 'data set', 'data set num']
+    possible_edu_level_column_names = [
+        'Edu level',
+        'EDU_LEVEL',
+        'Education Level',
+        'Education',
+        'EDUCATION',
+        'Edu lev',
+        'Edu_lev']
+    possible_lesion_load_column_names = [
+        'Total_LL', 'lesion load', 'Lesion Load', 'Total LL']
+    possible_set_number_names = [
+        'Set',
+        'set',
+        'Data set num',
+        'Data Set',
+        'Data set',
+        'data set',
+        'data set num']
 
     list_column_names = data_file.columns.tolist()
     if not set(possible_patient_column_names).intersection(list_column_names):
-        raise Exception(f"Patient column name must be spelled {possible_patient_column_names}.")
+        raise Exception(
+            f"Patient column name must be spelled {possible_patient_column_names}.")
 
-    
-    patient_col_name = set(possible_patient_column_names).intersection(list_column_names)
+    patient_col_name = set(
+        possible_patient_column_names).intersection(list_column_names)
     global patient_glob
     for item in patient_col_name:
         patient_glob = item
 
     if not set(possible_age_column_names).intersection(list_column_names):
-        raise Exception(f"Age column name must be spelled: {possible_age_column_names}.")
-    
-    age_col_name = set(possible_age_column_names).intersection(list_column_names)
+        raise Exception(
+            f"Age column name must be spelled: {possible_age_column_names}.")
+
+    age_col_name = set(possible_age_column_names).intersection(
+        list_column_names)
     global age_glob
     for item in age_col_name:
         age_glob = item
 
     if not set(possible_sex_column_names).intersection(list_column_names):
-        raise Exception(f"Sex column name must be spelled: {possible_sex_column_names}.")
-    
-    sex_col_name = set(possible_sex_column_names).intersection(list_column_names)
+        raise Exception(
+            f"Sex column name must be spelled: {possible_sex_column_names}.")
+
+    sex_col_name = set(possible_sex_column_names).intersection(
+        list_column_names)
     global sex_glob
     for item in sex_col_name:
         sex_glob = item
 
     if not set(possible_iq_column_names).intersection(list_column_names):
-        raise Exception(f"IQ column name must be spelled: {possible_iq_column_names}.")
-    
+        raise Exception(
+            f"IQ column name must be spelled: {possible_iq_column_names}.")
+
     iq_col_name = set(possible_iq_column_names).intersection(list_column_names)
     global iq_glob
     for item in iq_col_name:
         iq_glob = item
 
-    if not set(possible_edu_level_column_names).intersection(list_column_names):
-        raise Exception(f"Edu level column name must be spelled: {possible_edu_level_column_names}.")
-    
-    edu_level_col_name = set(possible_edu_level_column_names).intersection(list_column_names)
+    if not set(possible_edu_level_column_names).intersection(
+            list_column_names):
+        raise Exception(
+            f"Edu level column name must be spelled: {possible_edu_level_column_names}.")
+
+    edu_level_col_name = set(
+        possible_edu_level_column_names).intersection(list_column_names)
     global edu_level_glob
     for item in edu_level_col_name:
         edu_level_glob = item
 
-    if not set(possible_lesion_load_column_names).intersection(list_column_names):
-        raise Exception(f"Lesion load column name must be spelled: {possible_lesion_load_column_names}.")
+    if not set(possible_lesion_load_column_names).intersection(
+            list_column_names):
+        raise Exception(
+            f"Lesion load column name must be spelled: {possible_lesion_load_column_names}.")
 
-    lesion_load_col_name = set(possible_lesion_load_column_names).intersection(list_column_names)
+    lesion_load_col_name = set(
+        possible_lesion_load_column_names).intersection(list_column_names)
     global lesion_load_glob
     for item in lesion_load_col_name:
         lesion_load_glob = item
 
     if not set(possible_set_number_names).intersection(list_column_names):
         raise Exception(f"Data set nunber (1 or 2) not indicated.")
-    data_set_col_name = set(possible_set_number_names).intersection(list_column_names)
+    data_set_col_name = set(
+        possible_set_number_names).intersection(list_column_names)
     global data_set_num_glob
     for item in data_set_col_name:
         data_set_num_glob = item
 
 # creates list with patients within range of min and max age, <6ml lesion size
+
+
 def create_subject_list():
     subject_list = []
     max_age = data_file[age_glob].max()
@@ -146,7 +189,14 @@ def create_subject_list():
         edu_level = data_row[subject_num, edu_level_glob]
         data_set_number = data_row[subject_num, data_set_num_glob]
 
-        subject_data = [data_set_number, num, age, sex, iq, edu_level, lesion_size]
+        subject_data = [
+            data_set_number,
+            num,
+            age,
+            sex,
+            iq,
+            edu_level,
+            lesion_size]
 
         subject_list.append(subject_data)
 
@@ -178,15 +228,15 @@ def match_controls_with_patients(patient_list, control_list):
     for patient in patient_list:
         weights = create_minkowski_weights()
 
-        #controls and patients:
-        #minkowski distance so get cross product of all of them
-        #sort by total distance
-        #control index, patient index, 
-        #sort by distance--smallest distance between patient and control
-        #for each control, compare to each of patients
-        #end up with list of 2500--every single pair combo and distance
-        #sort by distance--these are all pairs with smallest distance
-        #for each control, find where they are in sorted list
+        # controls and patients:
+        # minkowski distance so get cross product of all of them
+        # sort by total distance
+        # control index, patient index,
+        # sort by distance--smallest distance between patient and control
+        # for each control, compare to each of patients
+        # end up with list of 2500--every single pair combo and distance
+        # sort by distance--these are all pairs with smallest distance
+        # for each control, find where they are in sorted list
 
         # one list all distances sorted
         # then find patient per control
@@ -196,7 +246,7 @@ def match_controls_with_patients(patient_list, control_list):
             patient), np.atleast_2d(control_list), 'wminkowski', w=weights))][0]
 
         matches = control_closest_matches.tolist()
- 
+
         for control in matches:
             if control in patient_healthy_control_data:
                 continue
