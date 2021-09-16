@@ -164,7 +164,6 @@ def validate_excel_column_names():
 
 # creates list with patients within range of min and max age, <6ml lesion size
 
-
 def create_subject_list():
     subject_list = []
     max_age = data_file[age_glob].max()
@@ -228,6 +227,7 @@ def match_controls_with_patients(patient_list, control_list):
     for patient in patient_list:
         weights = create_minkowski_weights()
 
+        #TODO:
         # controls and patients:
         # minkowski distance so get cross product of all of them
         # sort by total distance
